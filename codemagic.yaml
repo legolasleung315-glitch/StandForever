@@ -66,12 +66,25 @@ workflows:
             echo "WARNING: app_icon.png not found; using default icon."
           fi
 
-      - name: Get Flutter packages
-        script: |
-          set -e
-          cd "$CM_BUILD_DIR"
-          test -f pubspec.yaml
-          flutter pub get
+      - - name: Get Flutter packages
+  script: |
+    cd "$CM_BUILD_DIR"
+
+    echo "===== ROOT ====="
+    pwd
+    ls -la
+
+    echo "===== PUBSPEC ====="
+    cat pubspec.yaml
+
+    echo "===== FLUTTER ====="
+    flutter --version
+
+    echo "===== DART ====="
+    dart --version
+
+    echo "===== PUB GET ====="
+    flutter pub get -v
 
       - name: Analyze Flutter project
         script: |
