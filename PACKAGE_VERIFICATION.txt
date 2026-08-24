@@ -1,0 +1,33 @@
+堅棟堅企 V12 完整套件
+====================
+V7 .fnt count: 10
+V7 font PNG count: 10
+Nested font archives detected: 10
+Latest app icon: True
+codemagic.yaml: True
+pubspec.yaml: True
+lib/main.dart: True
+
+FNT files:
+assets/fonts/7_Segment/7_Segment.fnt
+assets/fonts/7_Segment_Bold/7_Segment_Bold.fnt
+assets/fonts/Film_Camera/Film_Camera.fnt
+assets/fonts/Film_Camera_Bold/Film_Camera_Bold.fnt
+assets/fonts/lato_bold/lato_bold.fnt
+assets/fonts/lato_regular/lato_regular.fnt
+assets/fonts/noto_bold/noto_bold.fnt
+assets/fonts/noto_regular/noto_regular.fnt
+assets/fonts/serif_bold/serif_bold.fnt
+assets/fonts/serif_regular/serif_regular.fnt
+
+Font PNG files:
+assets/fonts/7_Segment/page0.png
+assets/fonts/7_Segment_Bold/page0.png
+assets/fonts/Film_Camera/page0.png
+assets/fonts/Film_Camera_Bold/page0.png
+assets/fonts/lato_bold/page0.png
+assets/fonts/lato_regular/page0.png
+assets/fonts/noto_bold/page0.png
+assets/fonts/noto_regular/page0.png
+assets/fonts/serif_bold/page0.png
+assets/fonts/serif_regular/page0.png

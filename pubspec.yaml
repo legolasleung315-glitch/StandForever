@@ -1,0 +1,27 @@
+name: batch_photo_tools
+description: 堅棟堅企 batch photo processing tool for Android.
+publish_to: "none"
+
+version: 1.0.0+12
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  file_picker: 10.3.10
+  image: 4.9.1
+  intl: 0.20.2
+  shared_preferences: 2.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/fonts/
+    - assets/icon/app_icon.png
