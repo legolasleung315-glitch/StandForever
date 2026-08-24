@@ -202,7 +202,6 @@ class _PhotoProcessorPageState extends State<PhotoProcessorPage> {
     return File(path).readAsBytes();
   }
 
-  void _applyTodayWorkMode() {
     final now = DateTime.now();
     setState(() {
       _applyTime = true;
