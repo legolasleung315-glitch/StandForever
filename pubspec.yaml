@@ -1,8 +1,8 @@
 name: batch_photo_tools
-description: 堅棟堅企 batch photo processing tool for Android.
+description: batch photo processing tool for Android.
 publish_to: "none"
 
-version: 1.0.0+12
+version: 2.0.0
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
