@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 part of 'photo_processor_page.dart';
 
 extension _PhotoProcessorStatePart on _PhotoProcessorPageState {
@@ -31,7 +33,7 @@ extension _PhotoProcessorStatePart on _PhotoProcessorPageState {
           prefs.getInt('timeDistributionMode') ?? _timeDistributionMode;
       _jpegQuality = prefs.getInt('jpegQuality') ?? _jpegQuality;
       final savedWidth = prefs.getInt('maxWidth') ?? _maxWidth;
-      if (savedWidth == 0 || _commonOutputWidths.contains(savedWidth)) {
+      if (savedWidth == 0 || _PhotoProcessorPageState._commonOutputWidths.contains(savedWidth)) {
         _maxWidth = savedWidth;
       } else {
         _maxWidth = savedWidth.clamp(500, 4000);
