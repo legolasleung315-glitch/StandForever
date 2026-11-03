@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 part of 'photo_processor_page.dart';
 
 extension _PhotoProcessorResultsPart on _PhotoProcessorPageState {
