@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 part of 'photo_processor_page.dart';
 
 extension _PhotoProcessorSettingsUiPart on _PhotoProcessorPageState {
@@ -75,14 +77,14 @@ extension _PhotoProcessorSettingsUiPart on _PhotoProcessorPageState {
             : (v) => _setStateAndSave(() => _applyWatermark = v),
       ),
       DropdownButtonFormField<String>(
-        initialValue: _fontLabels.containsKey(_fontFamily)
+        initialValue: _PhotoProcessorPageState._fontLabels.containsKey(_fontFamily)
             ? _fontFamily
             : 'Film_Camera',
         decoration: const InputDecoration(
           border: OutlineInputBorder(),
           labelText: '水印字體',
         ),
-        items: _fontLabels.entries
+        items: _PhotoProcessorPageState._fontLabels.entries
             .map(
               (entry) => DropdownMenuItem<String>(
                 value: entry.key,
