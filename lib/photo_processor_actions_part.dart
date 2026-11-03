@@ -1,4 +1,5 @@
 // ignore_for_file: invalid_use_of_protected_member
+
 part of 'photo_processor_page.dart';
 
 extension _PhotoProcessorActionsPart on _PhotoProcessorPageState {
@@ -244,10 +245,10 @@ extension _PhotoProcessorActionsPart on _PhotoProcessorPageState {
   }
 
   List<int> _outputWidthChoices() {
-    final widths = <int>{0, ..._commonOutputWidths};
+    final widths = <int>{0, ..._PhotoProcessorPageState._commonOutputWidths};
     if (_maxWidth > 0 &&
         _maxWidth <= 4000 &&
-        !_commonOutputWidths.contains(_maxWidth)) {
+        !_PhotoProcessorPageState._commonOutputWidths.contains(_maxWidth)) {
       widths.add(_maxWidth);
     }
     return widths.toList()..sort();
