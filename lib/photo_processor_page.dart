@@ -23,6 +23,7 @@ part 'photo_processor_processing_part.dart';
 part 'photo_processor_results_part.dart';
 part 'photo_processor_main_ui_part.dart';
 part 'photo_processor_settings_ui_part.dart';
+part 'photo_processor_settings_advanced_part.dart'; 
 
 class PhotoProcessorPage extends StatefulWidget {
   const PhotoProcessorPage({super.key});
