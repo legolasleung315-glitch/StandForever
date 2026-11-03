@@ -294,7 +294,7 @@ extension _PhotoProcessorActionsPart on _PhotoProcessorPageState {
   Future<void> _indexOutputInGallery(String documentUri) async {
     if (!Platform.isAndroid || documentUri.isEmpty) return;
     try {
-      await _mediaChannel.invokeMethod<void>('scanDocument', <String, dynamic>{
+      await _PhotoProcessorPageState._mediaChannel.invokeMethod<void>('scanDocument', <String, dynamic>{
         'uri': documentUri,
       });
     } catch (_) {}
