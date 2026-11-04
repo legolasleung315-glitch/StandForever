@@ -79,6 +79,46 @@ extension _PhotoProcessorSettingsAdvancedPart on _PhotoProcessorPageState {
             onChanged: (v) =>
                 _setStateAndSave(() => _noiseAmount = v.round())),
       ],
+      _sectionTitle('效能與水印清晰度'),
+      Text(
+        '水印 Supersampling：${_supersample}x'
+        '${_supersample >= 6 ? '（高畫質）' : _supersample >= 3 ? '（平衡）' : '（快速）'}',
+      ),
+      Slider(
+        value: _supersample.toDouble(),
+        min: 1,
+        max: 8,
+        divisions: 7,
+        label: '${_supersample}x',
+        onChanged: _isProcessing
+            ? null
+            : (v) => _setStateAndSave(() => _supersample = v.round()),
+      ),
+      const Text(
+        '1x 最快但可能有鋸齒，4x 平衡，6–8x 最清晰但最慢',
+        style: TextStyle(fontSize: 12),
+      ),
+      const SizedBox(height: 12),
+      Text(
+        _concurrency == 0
+            ? '同時處理張數：自動'
+            : '同時處理張數：$_concurrency 張',
+      ),
+      Slider(
+        value: _concurrency.toDouble(),
+        min: 0,
+        max: 8,
+        divisions: 8,
+        label: _concurrency == 0 ? '自動' : '$_concurrency',
+        onChanged: _isProcessing
+            ? null
+            : (v) => _setStateAndSave(() => _concurrency = v.round()),
+      ),
+      const Text(
+        '0 = 自動（依手機核心），低階手機建議 1–2，高階可試 6–8',
+        style: TextStyle(fontSize: 12),
+      ),
+      const SizedBox(height: 16),
       _sectionTitle('輸出設定'),
       const Text(
         '輸出尺寸（寬度）',

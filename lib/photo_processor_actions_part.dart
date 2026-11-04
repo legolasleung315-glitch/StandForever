@@ -259,6 +259,7 @@ extension _PhotoProcessorActionsPart on _PhotoProcessorPageState {
       'colorB': _colorB,
       'opacity': _opacity,
       'margin': _margin,
+      'supersample': _supersample.clamp(1, 8),
     };
     // Count first-time font asset loading and config preparation.
     _recordPerformance('configFont', configWatch.elapsedMicroseconds);

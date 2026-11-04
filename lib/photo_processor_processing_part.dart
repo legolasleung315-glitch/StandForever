@@ -75,10 +75,14 @@ extension _PhotoProcessorProcessingPart on _PhotoProcessorPageState {
     final total = _selectedFiles.length;
     _randomTimeSeed = DateTime.now().microsecondsSinceEpoch;
 
-    // Find N5 有 8 核，主 isolate 佔 1 核，其餘用於圖片處理。
-    // 上限 5 是兼顧記憶體（每張原圖峰值約 40MB）與吞吐的折衷。
-    final workerCount =
-        math.min(5, math.max(3, Platform.numberOfProcessors - 1));
+    // 同時處理張數：使用者可調 1–8，0 = 自動（依 CPU，上限 6）。
+    final int workerCount;
+    if (_concurrency >= 1 && _concurrency <= 8) {
+      workerCount = _concurrency;
+    } else {
+      // 自動：預留 1 核給 UI，上限 6 兼顧記憶體
+      workerCount = math.min(6, math.max(2, Platform.numberOfProcessors - 1));
+    }
     final batchSeed = DateTime.now().microsecondsSinceEpoch;
 
     try {

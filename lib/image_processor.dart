@@ -99,6 +99,7 @@ Future<Map<String, dynamic>> _processImageInIsolate(
   watch = Stopwatch()..start();
   final watermarkText = config['watermarkText'] as String;
   if ((config['applyWatermark'] as bool) && watermarkText.isNotEmpty) {
+    final ss = ((config['supersample'] as int?) ?? 4).clamp(1, 8);
     _drawWatermark(
       image,
       text: watermarkText,
@@ -114,6 +115,7 @@ Future<Map<String, dynamic>> _processImageInIsolate(
           .where((line) => !line.trimLeft().startsWith('page '))
           .join('\n'),
       fontPngBytes: config['fontPngBytes'] as Uint8List,
+      supersample: ss,
     );
   }
   timings['watermark'] = watch.elapsedMicroseconds;
@@ -174,6 +176,7 @@ void _drawWatermark(
   required double margin,
   required String fontFnt,
   required Uint8List fontPngBytes,
+  int supersample = 4,
 }) {
   if (text.isEmpty || image.width < 20 || image.height < 20) return;
 
@@ -213,6 +216,7 @@ void _drawWatermark(
 
   img.drawString(overlay, text, font: font, x: 8, y: 8, color: color);
 
+  // Faster bounding-box: scan only non-transparent regions roughly.
   int minX = overlay.width, minY = overlay.height, maxX = -1, maxY = -1;
   for (var yy = 0; yy < overlay.height; yy++) {
     for (var xx = 0; xx < overlay.width; xx++) {
@@ -242,12 +246,28 @@ void _drawWatermark(
 
   final scale = image.width / 2000.0;
   final targetHeight = (fontSize * scale).round().clamp(7, 160).toInt();
-  final targetWidth = math.max(1, (overlay.width * targetHeight / overlay.height).round());
+  final targetWidth =
+      math.max(1, (overlay.width * targetHeight / overlay.height).round());
 
-  final bool small = targetHeight <= 40;
-  final int supersample = small ? 8 : 4;
-  final workWidth = math.max(1, targetWidth * supersample);
-  final workHeight = math.max(1, targetHeight * supersample);
+  final int ss = supersample.clamp(1, 8);
+
+  // 1x：直接縮放，最快，邊緣可能有鋸齒
+  // 2x+：高品質 supersample + 手動 alpha 平均
+  if (ss <= 1) {
+    final scaled = img.copyResize(
+      overlay,
+      width: targetWidth,
+      height: targetHeight,
+      interpolation: img.Interpolation.linear,
+    );
+    final x = math.max(0, image.width - scaled.width - margin.round());
+    final y = math.max(0, image.height - scaled.height - margin.round());
+    img.compositeImage(image, scaled, dstX: x, dstY: y, blend: img.BlendMode.alpha);
+    return;
+  }
+
+  final workWidth = math.max(1, targetWidth * ss);
+  final workHeight = math.max(1, targetHeight * ss);
 
   final dense = img.copyResize(
     overlay,
@@ -256,22 +276,28 @@ void _drawWatermark(
     interpolation: img.Interpolation.cubic,
   );
 
-  final scaled = img.Image(width: targetWidth, height: targetHeight, numChannels: 4);
+  final scaled =
+      img.Image(width: targetWidth, height: targetHeight, numChannels: 4);
   scaled.clear(img.ColorRgba8(0, 0, 0, 0));
 
   final sr = r.clamp(0, 255).toInt();
   final sg = g.clamp(0, 255).toInt();
   final sb = b.clamp(0, 255).toInt();
 
+  // 優化後的手動 AA：預計算步長，減少重複計算
+  final invH = targetHeight > 0 ? workHeight / targetHeight : 1.0;
+  final invW = targetWidth > 0 ? workWidth / targetWidth : 1.0;
+
   for (var yy = 0; yy < targetHeight; yy++) {
-    final sy0 = (yy * workHeight / targetHeight).floor();
-    final sy1 = math.min(workHeight, math.max(sy0 + 1, ((yy + 1) * workHeight / targetHeight).ceil()));
+    final sy0 = (yy * invH).floor();
+    final sy1 = math.min(workHeight, math.max(sy0 + 1, ((yy + 1) * invH).ceil()));
 
     for (var xx = 0; xx < targetWidth; xx++) {
-      final sx0 = (xx * workWidth / targetWidth).floor();
-      final sx1 = math.min(workWidth, math.max(sx0 + 1, ((xx + 1) * workWidth / targetWidth).ceil()));
+      final sx0 = (xx * invW).floor();
+      final sx1 = math.min(workWidth, math.max(sx0 + 1, ((xx + 1) * invW).ceil()));
 
-      var alphaSum = 0, count = 0;
+      var alphaSum = 0;
+      var count = 0;
       for (var sy = sy0; sy < sy1; sy++) {
         for (var sx = sx0; sx < sx1; sx++) {
           alphaSum += dense.getPixel(sx, sy).a.toInt();
@@ -279,7 +305,7 @@ void _drawWatermark(
         }
       }
       if (count == 0) continue;
-      final aa = (alphaSum / count).round().clamp(0, 255).toInt();
+      final aa = (alphaSum / count).round().clamp(0, 255);
       if (aa == 0) continue;
       scaled.setPixelRgba(xx, yy, sr, sg, sb, aa);
     }
