@@ -53,17 +53,20 @@ Future<Map<String, dynamic>> _processImageInIsolate(
   if (requestedWidth > 0) {
     final maxWidth = requestedWidth.clamp(480, 4000).toInt();
     if (image.width > maxWidth) {
-      image = img.copyResize(
+      final resized = img.copyResize(
         image,
         width: maxWidth,
         interpolation: img.Interpolation.linear,
       );
+      // 讓全解析度原圖可被 GC，降低並行時記憶體峰值
+      image = resized;
     }
   }
   timings['resize'] = watch.elapsedMicroseconds;
 
   watch = Stopwatch()..start();
   final filterMode = config['filterMode'] as int;
+  // filterMode 0 = 原始，完全跳過；1/2 才做色彩 + 輕微模糊
   if (filterMode == 1) {
     image = img.adjustColor(
       image,

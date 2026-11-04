@@ -81,21 +81,24 @@ extension _PhotoProcessorSettingsAdvancedPart on _PhotoProcessorPageState {
       ],
       _sectionTitle('效能與水印清晰度'),
       Text(
-        '水印 Supersampling：${_supersample}x'
-        '${_supersample >= 6 ? '（高畫質）' : _supersample >= 3 ? '（平衡）' : '（快速）'}',
+        _supersample == 0
+            ? '水印 Supersampling：自動'
+                '（${_maxWidth > 0 && _maxWidth <= 480 ? '3x' : '2x'}）'
+            : '水印 Supersampling：${_supersample}x'
+                '${_supersample >= 6 ? '（高畫質）' : _supersample >= 3 ? '（平衡）' : '（快速）'}',
       ),
       Slider(
         value: _supersample.toDouble(),
-        min: 1,
+        min: 0,
         max: 8,
-        divisions: 7,
-        label: '${_supersample}x',
+        divisions: 8,
+        label: _supersample == 0 ? '自動' : '${_supersample}x',
         onChanged: _isProcessing
             ? null
             : (v) => _setStateAndSave(() => _supersample = v.round()),
       ),
       const Text(
-        '1x 最快但可能有鋸齒，4x 平衡，6–8x 最清晰但最慢',
+        '0 = 自動（≤480px→3x，≥640px→2x）｜1x 最快｜6–8x 最清晰但最慢',
         style: TextStyle(fontSize: 12),
       ),
       const SizedBox(height: 12),
@@ -115,7 +118,7 @@ extension _PhotoProcessorSettingsAdvancedPart on _PhotoProcessorPageState {
             : (v) => _setStateAndSave(() => _concurrency = v.round()),
       ),
       const Text(
-        '0 = 自動（依手機核心），低階手機建議 1–2，高階可試 6–8',
+        '0 = 自動（依核心與輸出尺寸），低階建議 1–2，高階可試 6–8',
         style: TextStyle(fontSize: 12),
       ),
       const SizedBox(height: 16),

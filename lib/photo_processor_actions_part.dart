@@ -259,11 +259,19 @@ extension _PhotoProcessorActionsPart on _PhotoProcessorPageState {
       'colorB': _colorB,
       'opacity': _opacity,
       'margin': _margin,
-      'supersample': _supersample.clamp(1, 8),
+      'supersample': _resolveSupersample(),
     };
     // Count first-time font asset loading and config preparation.
     _recordPerformance('configFont', configWatch.elapsedMicroseconds);
     return result;
+  }
+
+  /// 0 = 自動：≤480px → 3x，≥640px → 2x；其餘用手動 1–8。
+  int _resolveSupersample() {
+    if (_supersample >= 1 && _supersample <= 8) return _supersample;
+    // 自動
+    if (_maxWidth > 0 && _maxWidth <= 480) return 3;
+    return 2; // 640 及以上或原圖
   }
 
   List<int> _outputWidthChoices() {

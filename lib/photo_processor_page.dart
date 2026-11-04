@@ -91,9 +91,10 @@ class _PhotoProcessorPageState extends State<PhotoProcessorPage> {
   int _randomTimeSeed = DateTime.now().microsecondsSinceEpoch;
   int _jpegQuality = 60;
   int _maxWidth = 1080;
-  /// 水印 supersampling 倍數 1–8。越高越清晰但越慢。預設 4（平衡）。
-  int _supersample = 4;
-  /// 同時處理張數。0 = 自動（依 CPU 核心），1–8 手動。
+  /// 水印 supersampling：0 = 自動（依輸出尺寸），1–8 = 固定倍數。
+  /// 自動規則：輸出 ≤480px → 3x，≥640px → 2x。
+  int _supersample = 0;
+  /// 同時處理張數。0 = 自動（依 CPU 與輸出尺寸），1–8 手動。
   int _concurrency = 0;
   static const List<int> _commonOutputWidths = <int>[
     480,

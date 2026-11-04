@@ -38,7 +38,7 @@ extension _PhotoProcessorStatePart on _PhotoProcessorPageState {
       } else {
         _maxWidth = savedWidth.clamp(500, 4000);
       }
-      _supersample = (prefs.getInt('supersample') ?? _supersample).clamp(1, 8);
+      _supersample = (prefs.getInt('supersample') ?? _supersample).clamp(0, 8);
       _concurrency = (prefs.getInt('concurrency') ?? _concurrency).clamp(0, 8);
       _renameMode = prefs.getInt('renameMode') ?? _renameMode;
       _customPrefix = prefs.getString('customPrefix') ?? _customPrefix;
