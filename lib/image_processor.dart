@@ -23,16 +23,35 @@ Future<Uint8List> _processImageInIsolate(
   Uint8List inputBytes,
   Map<String, dynamic> config,
 ) async {
+
+  final swTotal = Stopwatch()..start();
+
+  // Decode
+  final swDecode = Stopwatch()..start();
+
   final decoded = img.decodeImage(inputBytes);
-  if (decoded == null) throw Exception('無法解碼圖片');
+
+  debugPrint(
+    '[PROFILE] Decode ${swDecode.elapsedMilliseconds} ms',
+  );
+
+  if (decoded == null) {
+    throw Exception('無法解碼圖片');
+  }
 
   img.Image image = decoded;
+
   image.exif.clear();
   image.textData = null;
 
+  // Resize
+  final swResize = Stopwatch()..start();
+
   final requestedWidth = config['maxWidth'] as int;
+
   if (requestedWidth > 0) {
     final maxWidth = requestedWidth.clamp(480, 4000).toInt();
+
     if (image.width > maxWidth) {
       image = img.copyResize(
         image,
@@ -42,7 +61,15 @@ Future<Uint8List> _processImageInIsolate(
     }
   }
 
+  debugPrint(
+    '[PROFILE] Resize ${swResize.elapsedMilliseconds} ms',
+  );
+
+  // Filter
+  final swFilter = Stopwatch()..start();
+
   final filterMode = config['filterMode'] as int;
+
   if (filterMode == 1) {
     image = img.adjustColor(
       image,
@@ -50,7 +77,11 @@ Future<Uint8List> _processImageInIsolate(
       saturation: 0.4624,
       gamma: 1.03,
     );
-    image = img.gaussianBlur(image, radius: 1);
+
+    image = img.gaussianBlur(
+      image,
+      radius: 1,
+    );
   } else if (filterMode == 2) {
     image = img.adjustColor(
       image,
@@ -58,40 +89,91 @@ Future<Uint8List> _processImageInIsolate(
       saturation: 0.6724,
       gamma: 1.01,
     );
-    image = img.gaussianBlur(image, radius: 1);
+
+    image = img.gaussianBlur(
+      image,
+      radius: 1,
+    );
   }
+
+  debugPrint(
+    '[PROFILE] Filter ${swFilter.elapsedMilliseconds} ms',
+  );
+
+  // Grain + Noise
+  final swNoise = Stopwatch()..start();
 
   final grainAmount = (config['grainAmount'] as int?) ??
       ((config['addGrain'] as bool) ? 25 : 0);
-  final noiseAmount = (config['noiseAmount'] as int?) ?? 0;
-  
+
+  final noiseAmount =
+      (config['noiseAmount'] as int?) ?? 0;
+
   _applyGrainAndNoise(
     image,
     grainAmount: grainAmount,
     noiseAmount: noiseAmount,
   );
 
+  debugPrint(
+    '[PROFILE] GrainNoise ${swNoise.elapsedMilliseconds} ms',
+  );
+
+  // Watermark
+  final swWatermark = Stopwatch()..start();
+
   if (config['applyWatermark'] as bool) {
     _drawWatermark(
       image,
       text: config['watermarkText'] as String,
-      fontSize: (config['fontSize'] as num).toDouble(),
+      fontSize:
+          (config['fontSize'] as num).toDouble(),
       r: config['colorR'] as int,
       g: config['colorG'] as int,
       b: config['colorB'] as int,
-      opacity: (config['opacity'] as num).toDouble(),
-      margin: (config['margin'] as num).toDouble(),
+      opacity:
+          (config['opacity'] as num).toDouble(),
+      margin:
+          (config['margin'] as num).toDouble(),
       fontFnt: utf8
-          .decode(config['fontFntBytes'] as Uint8List)
+          .decode(
+            config['fontFntBytes'] as Uint8List,
+          )
           .split('\n')
-          .where((line) => !line.trimLeft().startsWith('page '))
+          .where(
+            (line) =>
+                !line.trimLeft().startsWith('page '),
+          )
           .join('\n'),
-      fontPngBytes: config['fontPngBytes'] as Uint8List,
+      fontPngBytes:
+          config['fontPngBytes'] as Uint8List,
     );
   }
 
-  final quality = (config['jpegQuality'] as int).clamp(60, 98).toInt();
-  final encoded = img.encodeJpg(image, quality: quality);
+  debugPrint(
+    '[PROFILE] Watermark ${swWatermark.elapsedMilliseconds} ms',
+  );
+
+  // JPG Encode
+  final swJpg = Stopwatch()..start();
+
+  final quality = (config['jpegQuality'] as int)
+      .clamp(60, 98)
+      .toInt();
+
+  final encoded = img.encodeJpg(
+    image,
+    quality: quality,
+  );
+
+  debugPrint(
+    '[PROFILE] JPG ${swJpg.elapsedMilliseconds} ms',
+  );
+
+  debugPrint(
+    '[PROFILE] TOTAL ${swTotal.elapsedMilliseconds} ms',
+  );
+
   return encoded;
 }
 
