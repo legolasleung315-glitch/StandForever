@@ -40,15 +40,7 @@ Future<Map<String, dynamic>> _processImageInIsolate(
 ) async {
   final timings = <String, int>{};
   var watch = Stopwatch()..start();
-
-  // 優先使用 JPEG 專用解碼（多數手機照片），失敗再 fallback 通用解碼
-  img.Image? decoded;
-  if (inputBytes.length > 3 &&
-      inputBytes[0] == 0xFF &&
-      inputBytes[1] == 0xD8) {
-    decoded = img.decodeJpg(inputBytes);
-  }
-  decoded ??= img.decodeImage(inputBytes);
+  final decoded = img.decodeImage(inputBytes);
   if (decoded == null) throw Exception('無法解碼圖片');
   timings['decode'] = watch.elapsedMicroseconds;
 

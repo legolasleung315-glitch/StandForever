@@ -75,22 +75,20 @@ extension _PhotoProcessorProcessingPart on _PhotoProcessorPageState {
     final total = _selectedFiles.length;
     _randomTimeSeed = DateTime.now().microsecondsSinceEpoch;
 
-    // 同時處理張數：1–8 手動，0 = 自動（依 CPU + 輸出尺寸，更積極）。
+    // 同時處理張數：1–8 手動，0 = 自動（依 CPU + 輸出尺寸）。
     final int workerCount;
     if (_concurrency >= 1 && _concurrency <= 8) {
       workerCount = _concurrency;
     } else {
+      // 自動：預留 1 核給 UI。輸出較小可多開一點。
       final cores = Platform.numberOfProcessors;
-      // 預留 1 核給 UI，其餘盡量用來跑圖
-      int maxWorkers = math.max(3, cores - 1);
+      int maxWorkers = 6;
       if (_maxWidth > 0 && _maxWidth <= 720) {
-        maxWorkers = math.min(8, maxWorkers + 1); // 小圖可多開
+        maxWorkers = 7;
       } else if (_maxWidth >= 1920) {
-        maxWorkers = math.min(5, maxWorkers); // 大圖稍微保守
-      } else {
-        maxWorkers = math.min(7, maxWorkers); // 1080 等常用尺寸
+        maxWorkers = 4; // 大圖記憶體壓力較高
       }
-      workerCount = maxWorkers.clamp(2, 8);
+      workerCount = math.min(maxWorkers, math.max(2, cores - 1));
     }
     final batchSeed = DateTime.now().microsecondsSinceEpoch;
 
